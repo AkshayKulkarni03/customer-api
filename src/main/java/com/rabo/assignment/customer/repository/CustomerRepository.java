@@ -2,7 +2,7 @@ package com.rabo.assignment.customer.repository;
 
 import java.util.List;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.repository.CrudRepository;
 
 import com.rabo.assignment.customer.model.Customer;
 
@@ -10,7 +10,7 @@ import com.rabo.assignment.customer.model.Customer;
  * @author akshay
  *
  */
-public interface CustomerRepository extends MongoRepository<Customer, String> {
+public interface CustomerRepository extends CrudRepository<Customer, String> {
 
 	/**
 	 * @param firstName
