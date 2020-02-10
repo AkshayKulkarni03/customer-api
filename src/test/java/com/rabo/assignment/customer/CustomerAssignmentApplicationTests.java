@@ -8,6 +8,7 @@ class CustomerAssignmentApplicationTests {
 
 	@Test
 	void contextLoads() {
+		CustomerAssignmentApplication.main(new String[] {});
 	}
 
 }
