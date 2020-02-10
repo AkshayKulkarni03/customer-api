@@ -1,4 +1,4 @@
-package com.rabo.assignment.customer.resource;
+package com.rabo.assignment.customer.api.resource;
 
 import javax.validation.constraints.NotNull;
 

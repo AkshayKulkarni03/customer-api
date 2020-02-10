@@ -1,4 +1,4 @@
-package com.rabo.assignment.customer.resource;
+package com.rabo.assignment.customer.api.resource;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.rabo.assignment.customer.model.Customer;
-import com.rabo.assignment.customer.repository.CustomerRepository;
+import com.rabo.assignment.customer.api.model.Customer;
+import com.rabo.assignment.customer.api.repository.CustomerRepository;
 
 @RestController
 @RequestMapping("/customer")

@@ -1,4 +1,4 @@
-package com.rabo.assignment.customer.model;
+package com.rabo.assignment.customer.api.model;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
