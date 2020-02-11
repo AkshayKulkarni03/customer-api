@@ -1,4 +1,4 @@
-# customer-api
+# Customer-API
 Customer API [Spring Boot](http://projects.spring.io/spring-boot/) with embedded h2 Database.
 
 ## Requirements
