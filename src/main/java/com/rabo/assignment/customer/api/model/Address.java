@@ -13,6 +13,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Address of customer. Address have one to one mapping with customer while
+ * keeping same Id as customer id as unique key for entity
+ * 
+ * @author akshay
+ *
+ */
 @Getter
 @Setter
 @NoArgsConstructor

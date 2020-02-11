@@ -1,4 +1,4 @@
-package com.rabo.assignment.customer.api.resource;
+package com.rabo.assignment.customer.api.controller;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -15,17 +16,27 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rabo.assignment.customer.api.exception.CustomerNotFoundException;
 import com.rabo.assignment.customer.api.model.Address;
 import com.rabo.assignment.customer.api.model.Customer;
+import com.rabo.assignment.customer.api.model.CustomerAddressRequest;
+import com.rabo.assignment.customer.api.model.CustomerRequest;
 import com.rabo.assignment.customer.api.repository.AddressRepository;
 import com.rabo.assignment.customer.api.repository.CustomerRepository;
 
+/**
+ * Customer rest controller class contains all customer related operations
+ * implemented as part of this.
+ * 
+ * @author akshay
+ *
+ */
 @RestController
-@RequestMapping("/customer")
-public class CustomerResource {
+@RequestMapping("/customers")
+public class CustomerController {
 
 	@Autowired
 	private CustomerRepository customerRepository;
@@ -34,11 +45,14 @@ public class CustomerResource {
 	private AddressRepository addressRepository;
 
 	/**
-	 * @param customerRequest
-	 * @return
+	 * POST request for customer. Adds new customer with all mandatory details.
+	 * 
+	 * @param customerRequest request body with all details of customer.
+	 * @return newly generated customer id.
 	 */
 	@PostMapping(produces = APPLICATION_JSON_VALUE)
-	public ResponseEntity<String> addNewCsutomer(@RequestBody CustomerRequest customerRequest) {
+	@ResponseBody
+	public ResponseEntity<String> addNewCustomer(@RequestBody CustomerRequest customerRequest) {
 
 		Customer customer = new Customer();
 		customer.setFirstName(customerRequest.getFirstName());
@@ -61,7 +75,9 @@ public class CustomerResource {
 	}
 
 	/**
-	 * @return
+	 * Get all customers present in directory.
+	 * 
+	 * @return list of {@link Customer}
 	 */
 	@GetMapping(produces = APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<Customer>> getAllCustomers() {
@@ -72,8 +88,11 @@ public class CustomerResource {
 	}
 
 	/**
-	 * @param id
-	 * @return
+	 * Get customer for specific Id.
+	 * 
+	 * @param id for which customer details needs to be fetched.
+	 * @return {@link Customer} if present, or {@link CustomerNotFoundException}
+	 *         will be thrown with {@link HttpStatus#NOT_FOUND}
 	 */
 	@GetMapping(value = "/{id}", produces = APPLICATION_JSON_VALUE)
 	public ResponseEntity<Customer> getCustomerById(@PathVariable("id") String id) {
@@ -84,9 +103,13 @@ public class CustomerResource {
 	}
 
 	/**
-	 * @param firstName
-	 * @param lastName
-	 * @return
+	 * Search for customer based on first name and/or last name of customer, all
+	 * parameters are optional for search.
+	 * 
+	 * @param firstName first name of customer to be searched.
+	 * @param lastName  last name of customer to be searched.
+	 * @return list of {@link Customer} with matching criteria or else empty list
+	 *         will be returned.
 	 */
 	@GetMapping(value = "/search", produces = APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<Customer>> getCustomerByName(
@@ -105,9 +128,13 @@ public class CustomerResource {
 	}
 
 	/**
-	 * @param id
-	 * @param address
-	 * @return
+	 * Update customer address for specific customer.
+	 * 
+	 * @param id      customer id for which address needs to be updated.
+	 * @param address Customer address body with all details of address.
+	 * @return no content will be returned, in case of customer not found in
+	 *         directory {@link CustomerNotFoundException} will be thrown with
+	 *         {@link HttpStatus#NOT_FOUND}
 	 */
 	@PatchMapping("/{id}")
 	public ResponseEntity<Void> updateCustomerAddress(@PathVariable("id") String id,

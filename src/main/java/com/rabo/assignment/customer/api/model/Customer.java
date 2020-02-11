@@ -17,6 +17,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Customer model class with JPA implementations with all information related to
+ * customer. Contains one to one mapping with address of the customer.
+ * 
+ * @see Entity
+ * @see OneToOne
+ * @author akshay
+ *
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -31,7 +40,6 @@ public class Customer implements Serializable {
 	@Id
 	@GeneratedValue(generator = "system-uuid")
 	@GenericGenerator(name = "system-uuid", strategy = "uuid")
-	@Setter(value = AccessLevel.PROTECTED)
 	private String id;
 	private String firstName;
 	private String lastName;

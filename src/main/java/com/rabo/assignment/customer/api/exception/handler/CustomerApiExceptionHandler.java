@@ -1,4 +1,4 @@
-package com.rabo.assignment.customer.config;
+package com.rabo.assignment.customer.api.exception.handler;
 
 import java.time.LocalDateTime;
 
@@ -18,13 +18,13 @@ import com.rabo.assignment.customer.api.exception.CustomerNotFoundException;
 @RestControllerAdvice
 public class CustomerApiExceptionHandler extends ResponseEntityExceptionHandler {
 
-    /**
-     * @param exception
-     * @return
-     */
-    @ExceptionHandler(value = CustomerNotFoundException.class)
-    @ResponseStatus(code = HttpStatus.NOT_FOUND)
-    public ApiError handleNotFoundException(RuntimeException exception) {
-        return new ApiError(HttpStatus.NOT_FOUND, LocalDateTime.now(), exception.getMessage());
-    }
+	/**
+	 * @param exception
+	 * @return
+	 */
+	@ExceptionHandler(value = CustomerNotFoundException.class)
+	@ResponseStatus(code = HttpStatus.NOT_FOUND)
+	public ApiError handleNotFoundException(RuntimeException exception) {
+		return new ApiError(HttpStatus.NOT_FOUND, LocalDateTime.now(), exception.getMessage());
+	}
 }
