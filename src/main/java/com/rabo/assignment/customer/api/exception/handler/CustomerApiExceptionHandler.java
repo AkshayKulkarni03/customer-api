@@ -12,19 +12,27 @@ import com.rabo.assignment.customer.api.exception.ApiError;
 import com.rabo.assignment.customer.api.exception.CustomerNotFoundException;
 
 /**
+ * Common exception handler for application, to handle exception raised for any
+ * API endpoint.
+ * 
+ * @see ResponseEntityExceptionHandler
  * @author akshay
  *
  */
 @RestControllerAdvice
 public class CustomerApiExceptionHandler extends ResponseEntityExceptionHandler {
 
-	/**
-	 * @param exception
-	 * @return
-	 */
-	@ExceptionHandler(value = CustomerNotFoundException.class)
-	@ResponseStatus(code = HttpStatus.NOT_FOUND)
-	public ApiError handleNotFoundException(RuntimeException exception) {
-		return new ApiError(HttpStatus.NOT_FOUND, LocalDateTime.now(), exception.getMessage());
-	}
+    /**
+     * Exception handler for {@link CustomerNotFoundException} with proper json
+     * structure to show error.
+     * 
+     * @param exception
+     *            {@link RuntimeException} to be handled.
+     * @return {@link ApiError} as Json with error message and status code.
+     */
+    @ExceptionHandler(value = CustomerNotFoundException.class)
+    @ResponseStatus(code = HttpStatus.NOT_FOUND)
+    public ApiError handleNotFoundException(RuntimeException exception) {
+        return new ApiError(HttpStatus.NOT_FOUND, LocalDateTime.now(), exception.getMessage());
+    }
 }

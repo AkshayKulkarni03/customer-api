@@ -3,6 +3,14 @@ package com.rabo.assignment.customer.api.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+/**
+ * This exception will be raised in case of customer is not found in customer
+ * repository.
+ * 
+ * @see RuntimeException
+ * @author akshay
+ *
+ */
 @ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Customer Not Found")
 public class CustomerNotFoundException extends RuntimeException {
 
