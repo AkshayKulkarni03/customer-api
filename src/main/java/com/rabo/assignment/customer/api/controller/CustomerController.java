@@ -8,13 +8,15 @@ import java.util.Optional;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,12 +24,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rabo.assignment.customer.api.exception.CustomerNotFoundException;
-import com.rabo.assignment.customer.api.model.Address;
-import com.rabo.assignment.customer.api.model.Customer;
 import com.rabo.assignment.customer.api.model.CustomerAddressRequest;
 import com.rabo.assignment.customer.api.model.CustomerRequest;
-import com.rabo.assignment.customer.api.repository.AddressRepository;
-import com.rabo.assignment.customer.api.repository.CustomerRepository;
+import com.rabo.assignment.customer.data.model.Address;
+import com.rabo.assignment.customer.data.model.Customer;
+import com.rabo.assignment.customer.service.CustomerService;
 
 /**
  * Customer rest controller class contains all customer related operations
@@ -40,11 +41,10 @@ import com.rabo.assignment.customer.api.repository.CustomerRepository;
 @RequestMapping("/customers")
 public class CustomerController {
 
-    @Autowired
-    private CustomerRepository customerRepository;
+    private static final Logger LOG = LoggerFactory.getLogger(CustomerController.class);
 
     @Autowired
-    private AddressRepository addressRepository;
+    private CustomerService customerService;
 
     /**
      * POST request for customer. Adds new customer with all mandatory details.
@@ -56,6 +56,7 @@ public class CustomerController {
     @PostMapping(produces = APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<String> addNewCustomer(@Valid @RequestBody CustomerRequest customerRequest) {
+        LOG.info("Add new customer method is called");
 
         Customer customer = new Customer();
         customer.setFirstName(customerRequest.getFirstName());
@@ -72,22 +73,9 @@ public class CustomerController {
 
         customer.setCurrentLivingAddress(currentLivingAddress);
 
-        Customer newCustomer = customerRepository.saveAndFlush(customer);
+        String customerId = customerService.addNewCustomer(customer);
 
-        return ResponseEntity.ok(newCustomer.getId());
-    }
-
-    /**
-     * Get all customers present in directory.
-     * 
-     * @return list of {@link Customer}
-     */
-    @GetMapping(produces = APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Customer>> getAllCustomers() {
-        List<Customer> result = new ArrayList<>();
-        Iterable<Customer> all = customerRepository.findAll();
-        all.iterator().forEachRemaining(result::add);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(customerId);
     }
 
     /**
@@ -100,8 +88,8 @@ public class CustomerController {
      */
     @GetMapping(value = "/{id}", produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<Customer> getCustomerById(@PathVariable("id") String id) {
-        Optional<Customer> optionalCustomer = customerRepository.findById(id);
-        Customer customer = optionalCustomer.orElseThrow(() -> new CustomerNotFoundException(String.format("Customer with Id %s not found", id)));
+        LOG.info("Get Customer by id");
+        Customer customer = customerService.getCustomerById(id);
         return ResponseEntity.ok(customer);
     }
 
@@ -116,16 +104,15 @@ public class CustomerController {
      * @return list of {@link Customer} with matching criteria or else empty
      *         list will be returned.
      */
-    @GetMapping(value = "/search", produces = APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Customer>> getCustomerByName(@RequestParam(name = "firstName", required = false) Optional<String> firstName,
+    @GetMapping(produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Customer>> getCustomers(@RequestParam(name = "firstName", required = false) Optional<String> firstName,
             @RequestParam(name = "lastName", required = false) Optional<String> lastName) {
+        LOG.info("Get All Customers or filter based on criteria");
         List<Customer> result = new ArrayList<>();
-        if (firstName.isPresent() && lastName.isPresent()) {
-            result.addAll(customerRepository.findByFirstNameIgnoreCaseContainingAndLastNameIgnoreCase(firstName.get(), lastName.get()));
-        } else if (firstName.isPresent()) {
-            result.addAll(customerRepository.findByFirstNameIgnoreCase(firstName.get()));
-        } else if (lastName.isPresent()) {
-            result.addAll(customerRepository.findByLastNameIgnoreCase(lastName.get()));
+        if (firstName.isPresent() || lastName.isPresent()) {
+            result.addAll(customerService.getCustomersByName(firstName.orElse(""), lastName.orElse("")));
+        } else {
+            result.addAll(customerService.getAllCustomers());
         }
         return ResponseEntity.ok(result);
     }
@@ -141,21 +128,17 @@ public class CustomerController {
      *         directory {@link CustomerNotFoundException} will be thrown with
      *         {@link HttpStatus#NOT_FOUND}
      */
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}/address")
     public ResponseEntity<Void> updateCustomerAddress(@PathVariable("id") String id, @Valid @RequestBody CustomerAddressRequest address) {
-        Optional<Customer> optionalCustomer = customerRepository.findById(id);
-        Customer customer = optionalCustomer.orElseThrow(() -> new CustomerNotFoundException(String.format("Customer with Id %s not found", id)));
-
-        Optional<Address> optionalAddress = addressRepository.findById(customer.getId());
-        Address currentLivingAddress = optionalAddress
-                .orElseThrow(() -> new CustomerNotFoundException(String.format("Customer Address for Id %s not found", id)));
+        LOG.info("Update customer address for customer id");
+        Address currentLivingAddress = new Address();
 
         currentLivingAddress.setCity(address.getCity());
         currentLivingAddress.setHouseNumber(address.getHouseNumber());
         currentLivingAddress.setStreet(address.getStreet());
         currentLivingAddress.setZipCode(address.getZipCode());
 
-        addressRepository.saveAndFlush(currentLivingAddress);
+        customerService.updateCustomerAddress(id, currentLivingAddress);
 
         return ResponseEntity.noContent().build();
 

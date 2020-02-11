@@ -1,4 +1,4 @@
-package com.rabo.assignment.customer.api.model;
+package com.rabo.assignment.customer.data.model;
 
 import java.io.Serializable;
 

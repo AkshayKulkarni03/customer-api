@@ -4,6 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -24,217 +27,199 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.rabo.assignment.customer.api.controller.CustomerController;
 import com.rabo.assignment.customer.api.exception.CustomerNotFoundException;
-import com.rabo.assignment.customer.api.model.Address;
-import com.rabo.assignment.customer.api.model.Customer;
 import com.rabo.assignment.customer.api.model.CustomerAddressRequest;
 import com.rabo.assignment.customer.api.model.CustomerRequest;
-import com.rabo.assignment.customer.api.repository.AddressRepository;
-import com.rabo.assignment.customer.api.repository.CustomerRepository;
+import com.rabo.assignment.customer.data.model.Address;
+import com.rabo.assignment.customer.data.model.Customer;
+import com.rabo.assignment.customer.service.CustomerService;
 
 @ExtendWith(MockitoExtension.class)
 public class CustomerControllerTest {
 
-	@InjectMocks
-	private CustomerController unitToTest;
+    @InjectMocks
+    private CustomerController unitToTest;
 
-	@Mock
-	private CustomerRepository customerRepository;
+    @Mock
+    private CustomerService customerService;
 
-	@Mock
-	private AddressRepository addressRepository;
+    @Test
+    void testAddNewCustomer() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
-	@Test
-	void testAddNewCustomer() {
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+        when(customerService.addNewCustomer(any(Customer.class))).thenReturn("101");
 
-		Customer customer = new Customer();
-		customer.setId("101");
+        CustomerRequest customerToAdd = new CustomerRequest();
+        customerToAdd.setFirstName("Test FirstName");
+        customerToAdd.setLastName("Test LastName");
+        customerToAdd.setAge(100);
 
-		when(customerRepository.saveAndFlush(any(Customer.class))).thenReturn(customer);
+        CustomerAddressRequest currentLivingAddress = new CustomerAddressRequest("Test Street", "House Number", "Test City", "Test ZipCode");
 
-		CustomerRequest customerToAdd = new CustomerRequest();
-		customerToAdd.setFirstName("Test FirstName");
-		customerToAdd.setLastName("Test LastName");
-		customerToAdd.setAge(100);
+        customerToAdd.setAddress(currentLivingAddress);
 
-		CustomerAddressRequest currentLivingAddress = new CustomerAddressRequest("Test Street", "House Number",
-				"Test City", "Test ZipCode");
+        ResponseEntity<String> responseEntity = unitToTest.addNewCustomer(customerToAdd);
 
-		customerToAdd.setAddress(currentLivingAddress);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isEqualTo("101");
 
-		ResponseEntity<String> responseEntity = unitToTest.addNewCustomer(customerToAdd);
+    }
 
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseEntity.getBody()).isEqualTo("101");
+    @Test
+    void testGetAllCustomers() {
+        Customer customer1 = getCustomer();
 
-	}
+        Customer customer2 = new Customer();
+        customer2.setAge(20);
+        customer2.setFirstName("FirstName2");
+        customer2.setLastName("LastName2");
 
-	@Test
-	void testGetAllCustomers() {
-		Customer customer1 = getCustomer();
+        Address address2 = new Address();
+        address2.setCity("TestCity2");
+        address2.setHouseNumber("420");
+        address2.setStreet("TestStreet2");
+        address2.setZipCode("TestZipCode");
+        address2.setCustomer(customer2);
 
-		Customer customer2 = new Customer();
-		customer2.setAge(20);
-		customer2.setFirstName("FirstName2");
-		customer2.setLastName("LastName2");
+        customer2.setCurrentLivingAddress(address2);
 
-		Address address2 = new Address();
-		address2.setCity("TestCity2");
-		address2.setHouseNumber("420");
-		address2.setStreet("TestStreet2");
-		address2.setZipCode("TestZipCode");
-		address2.setCustomer(customer2);
+        ArrayList<Customer> list = new ArrayList<>();
+        list.addAll(Arrays.asList(customer1, customer2));
 
-		customer2.setCurrentLivingAddress(address2);
+        when(customerService.getAllCustomers()).thenReturn(list);
 
-		ArrayList<Customer> list = new ArrayList<>();
-		list.addAll(Arrays.asList(customer1, customer2));
+        ResponseEntity<List<Customer>> responseEntity = unitToTest.getCustomers(Optional.empty(), Optional.empty());
 
-		when(customerRepository.findAll()).thenReturn(list);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody().size()).isEqualTo(2);
+        assertThat(responseEntity.getBody().get(0).getFirstName()).isEqualTo(customer1.getFirstName());
+        assertThat(responseEntity.getBody().get(1).getFirstName()).isEqualTo(customer2.getFirstName());
 
-		ResponseEntity<List<Customer>> responseEntity = unitToTest.getAllCustomers();
+    }
 
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseEntity.getBody().size()).isEqualTo(2);
-		assertThat(responseEntity.getBody().get(0).getFirstName()).isEqualTo(customer1.getFirstName());
-		assertThat(responseEntity.getBody().get(1).getFirstName()).isEqualTo(customer2.getFirstName());
+    @Test
+    void testGetCustomerById() {
+        Customer customer = getCustomer();
 
-	}
+        when(customerService.getCustomerById("101")).thenReturn(customer);
 
-	@Test
-	void testGetCustomerById() {
-		Customer customer = getCustomer();
+        ResponseEntity<Customer> responseEntity = unitToTest.getCustomerById("101");
 
-		when(customerRepository.findById("101")).thenReturn(Optional.of(customer));
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody().getFirstName()).isEqualTo(customer.getFirstName());
+    }
 
-		ResponseEntity<Customer> responseEntity = unitToTest.getCustomerById("101");
+    @Test
+    void testGetCustomerByIdThrowsException() {
+        when(customerService.getCustomerById("102")).thenThrow(new CustomerNotFoundException("Customer with Id 102 not found"));
+        CustomerNotFoundException exception = assertThrows(CustomerNotFoundException.class, () -> {
+            unitToTest.getCustomerById("102");
+        });
+        assertEquals("Customer with Id 102 not found", exception.getMessage());
+    }
 
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseEntity.getBody().getFirstName()).isEqualTo(customer.getFirstName());
-	}
+    @Test
+    void testGetCustomerByFirstName() {
+        Customer customer = getCustomer();
+        List<Customer> list = new ArrayList<>();
+        list.add(customer);
+        when(customerService.getCustomersByName("firstName1", "")).thenReturn(list);
 
-	@Test
-	void testGetCustomerByIdThrowsException() {
-		when(customerRepository.findById("102")).thenReturn(Optional.empty());
+        ResponseEntity<List<Customer>> responseEntity = unitToTest.getCustomers(Optional.of("firstName1"), Optional.empty());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody().size()).isEqualTo(1);
+        assertThat(responseEntity.getBody().get(0).getFirstName()).isEqualTo(customer.getFirstName());
+    }
 
-		CustomerNotFoundException exception = assertThrows(CustomerNotFoundException.class, () -> {
-			unitToTest.getCustomerById("102");
-		});
-		assertEquals("Customer with Id 102 not found", exception.getMessage());
-	}
+    @Test
+    void testGetCustomerByLastName() {
+        Customer customer = getCustomer();
+        List<Customer> list = new ArrayList<>();
+        list.add(customer);
 
-	@Test
-	void testGetCustomerByFirstName() {
-		Customer customer = getCustomer();
-		List<Customer> list = new ArrayList<>();
-		list.add(customer);
-		when(customerRepository.findByFirstNameIgnoreCase("firstName1")).thenReturn(list);
+        when(customerService.getCustomersByName("", "lastname1")).thenReturn(list);
 
-		ResponseEntity<List<Customer>> responseEntity = unitToTest.getCustomerByName(Optional.of("firstName1"),
-				Optional.empty());
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseEntity.getBody().size()).isEqualTo(1);
-		assertThat(responseEntity.getBody().get(0).getFirstName()).isEqualTo(customer.getFirstName());
-	}
+        ResponseEntity<List<Customer>> responseEntity = unitToTest.getCustomers(Optional.empty(), Optional.of("lastname1"));
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody().size()).isEqualTo(1);
+        assertThat(responseEntity.getBody().get(0).getLastName()).isEqualTo(customer.getLastName());
+    }
 
-	@Test
-	void testGetCustomerByLastName() {
-		Customer customer = getCustomer();
-		List<Customer> list = new ArrayList<>();
-		list.add(customer);
+    @Test
+    void testGetCustomerByFirstNameAndLastName() {
+        Customer customer = getCustomer();
+        List<Customer> list = new ArrayList<>();
+        list.add(customer);
+        when(customerService.getCustomersByName("firstName1", "lastname1")).thenReturn(list);
 
-		when(customerRepository.findByLastNameIgnoreCase("lastname1")).thenReturn(list);
+        ResponseEntity<List<Customer>> responseEntity = unitToTest.getCustomers(Optional.of("firstName1"), Optional.of("lastname1"));
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody().size()).isEqualTo(1);
+        assertThat(responseEntity.getBody().get(0).getFirstName()).isEqualTo(customer.getFirstName());
+    }
 
-		ResponseEntity<List<Customer>> responseEntity = unitToTest.getCustomerByName(Optional.empty(),
-				Optional.of("lastname1"));
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseEntity.getBody().size()).isEqualTo(1);
-		assertThat(responseEntity.getBody().get(0).getLastName()).isEqualTo(customer.getLastName());
-	}
+    @Test
+    void testUpdateCustomerAddress() {
+        CustomerAddressRequest currentLivingAddress = new CustomerAddressRequest();
+        currentLivingAddress.setCity("Test City");
+        currentLivingAddress.setHouseNumber("House Number");
+        currentLivingAddress.setStreet("Test Street");
+        currentLivingAddress.setZipCode("Test ZipCode");
 
-	@Test
-	void testGetCustomerByFirstNameAndLastName() {
-		Customer customer = getCustomer();
-		List<Customer> list = new ArrayList<>();
-		list.add(customer);
-		when(customerRepository.findByFirstNameIgnoreCaseContainingAndLastNameIgnoreCase("firstName1", "lastname1"))
-				.thenReturn(list);
+        doNothing().when(customerService).updateCustomerAddress(eq("101"), any(Address.class));
 
-		ResponseEntity<List<Customer>> responseEntity = unitToTest.getCustomerByName(Optional.of("firstName1"),
-				Optional.of("lastname1"));
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseEntity.getBody().size()).isEqualTo(1);
-		assertThat(responseEntity.getBody().get(0).getFirstName()).isEqualTo(customer.getFirstName());
-	}
+        ResponseEntity<Void> responseEntity = unitToTest.updateCustomerAddress("101", currentLivingAddress);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-	@Test
-	void testUpdateCustomerAddress() {
-		Customer customer = getCustomer();
-		Address address = customer.getCurrentLivingAddress();
+    }
 
-		CustomerAddressRequest currentLivingAddress = new CustomerAddressRequest();
-		currentLivingAddress.setCity("Test City");
-		currentLivingAddress.setHouseNumber("House Number");
-		currentLivingAddress.setStreet("Test Street");
-		currentLivingAddress.setZipCode("Test ZipCode");
+    @Test
+    void testUpdateCustomerAddressCustomerNotFound() {
+        CustomerAddressRequest currentLivingAddress = new CustomerAddressRequest();
+        currentLivingAddress.setCity("Test City");
+        currentLivingAddress.setHouseNumber("House Number");
+        currentLivingAddress.setStreet("Test Street");
+        currentLivingAddress.setZipCode("Test ZipCode");
 
-		when(customerRepository.findById("101")).thenReturn(Optional.of(customer));
-		when(addressRepository.findById("101")).thenReturn(Optional.of(address));
+        doThrow(new CustomerNotFoundException("Customer with Id 102 not found")).when(customerService).updateCustomerAddress(eq("102"), any(Address.class));
+        CustomerNotFoundException exception = assertThrows(CustomerNotFoundException.class, () -> {
+            unitToTest.updateCustomerAddress("102", currentLivingAddress);
+        });
+        assertEquals("Customer with Id 102 not found", exception.getMessage());
+    }
 
-		ResponseEntity<Void> responseEntity = unitToTest.updateCustomerAddress("101", currentLivingAddress);
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    @Test
+    void testUpdateCustomerAddressCustomerAddressNotFound() {
+        CustomerAddressRequest currentLivingAddress = new CustomerAddressRequest();
+        currentLivingAddress.setCity("Test City");
+        currentLivingAddress.setHouseNumber("House Number");
+        currentLivingAddress.setStreet("Test Street");
+        currentLivingAddress.setZipCode("Test ZipCode");
 
-	}
+        doThrow(new CustomerNotFoundException("Customer Address for Id 102 not found")).when(customerService).updateCustomerAddress(eq("102"),
+                any(Address.class));
 
-	@Test
-	void testUpdateCustomerAddressCustomerNotFound() {
-		CustomerAddressRequest currentLivingAddress = new CustomerAddressRequest();
-		currentLivingAddress.setCity("Test City");
-		currentLivingAddress.setHouseNumber("House Number");
-		currentLivingAddress.setStreet("Test Street");
-		currentLivingAddress.setZipCode("Test ZipCode");
+        CustomerNotFoundException exception = assertThrows(CustomerNotFoundException.class, () -> {
+            unitToTest.updateCustomerAddress("102", currentLivingAddress);
+        });
+        assertEquals("Customer Address for Id 102 not found", exception.getMessage());
+    }
 
-		when(customerRepository.findById("102")).thenReturn(Optional.empty());
-		CustomerNotFoundException exception = assertThrows(CustomerNotFoundException.class, () -> {
-			unitToTest.updateCustomerAddress("102", currentLivingAddress);
-		});
-		assertEquals("Customer with Id 102 not found", exception.getMessage());
-	}
+    private Customer getCustomer() {
+        Customer customer = new Customer();
+        customer.setId("101");
+        customer.setAge(20);
+        customer.setFirstName("FirstName1");
+        customer.setLastName("LastName1");
 
-	@Test
-	void testUpdateCustomerAddressCustomerAddressNotFound() {
-		Customer customer = getCustomer();
-		CustomerAddressRequest currentLivingAddress = new CustomerAddressRequest();
-		currentLivingAddress.setCity("Test City");
-		currentLivingAddress.setHouseNumber("House Number");
-		currentLivingAddress.setStreet("Test Street");
-		currentLivingAddress.setZipCode("Test ZipCode");
-
-		when(customerRepository.findById("102")).thenReturn(Optional.of(customer));
-		when(addressRepository.findById("101")).thenReturn(Optional.empty());
-
-		CustomerNotFoundException exception = assertThrows(CustomerNotFoundException.class, () -> {
-			unitToTest.updateCustomerAddress("102", currentLivingAddress);
-		});
-		assertEquals("Customer Address for Id 102 not found", exception.getMessage());
-	}
-
-	private Customer getCustomer() {
-		Customer customer = new Customer();
-		customer.setId("101");
-		customer.setAge(20);
-		customer.setFirstName("FirstName1");
-		customer.setLastName("LastName1");
-
-		Address address = new Address();
-		address.setCity("TestCity1");
-		address.setHouseNumber("400");
-		address.setStreet("TestStreet1");
-		address.setZipCode("TestZipCode");
-		address.setCustomer(customer);
-		customer.setCurrentLivingAddress(address);
-		return customer;
-	}
+        Address address = new Address();
+        address.setCity("TestCity1");
+        address.setHouseNumber("400");
+        address.setStreet("TestStreet1");
+        address.setZipCode("TestZipCode");
+        address.setCustomer(customer);
+        customer.setCurrentLivingAddress(address);
+        return customer;
+    }
 
 }

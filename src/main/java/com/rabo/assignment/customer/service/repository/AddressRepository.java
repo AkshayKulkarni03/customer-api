@@ -1,9 +1,9 @@
-package com.rabo.assignment.customer.api.repository;
+package com.rabo.assignment.customer.service.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.rabo.assignment.customer.api.model.Address;
+import com.rabo.assignment.customer.data.model.Address;
 
 /**
  * Address repository with all default CRUD operation implementation for

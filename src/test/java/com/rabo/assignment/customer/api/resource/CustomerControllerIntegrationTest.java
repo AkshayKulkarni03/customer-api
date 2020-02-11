@@ -4,8 +4,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -63,26 +63,26 @@ public class CustomerControllerIntegrationTest {
 
     @Test
     void testGetCustomerByName() throws Exception {
-        mockMvc.perform(get("/customers/search?firstName=john")).andDo(print()).andExpect(status().isOk()).andExpect(content().json(
+        mockMvc.perform(get("/customers?firstName=john")).andDo(print()).andExpect(status().isOk()).andExpect(content().json(
                 "[ { \"id\": \"1001\", \"firstName\": \"John\", \"lastName\": \"Doe\", \"age\": 20, \"currentLivingAddress\": { \"street\": \"SOMESTREET\", \"houseNumber\": \"200\", \"city\": \"Amsterdam\", \"zipCode\": \"1928ZP\" } } ]"));
-        mockMvc.perform(get("/customers/search?lastName=doE")).andDo(print()).andExpect(status().isOk()).andExpect(content().json(
+        mockMvc.perform(get("/customers?lastName=doE")).andDo(print()).andExpect(status().isOk()).andExpect(content().json(
                 "[ { \"id\": \"1001\", \"firstName\": \"John\", \"lastName\": \"Doe\", \"age\": 20, \"currentLivingAddress\": { \"street\": \"SOMESTREET\", \"houseNumber\": \"200\", \"city\": \"Amsterdam\", \"zipCode\": \"1928ZP\" } } ]"));
-        mockMvc.perform(get("/customers/search?firstName=john&lastName=doE")).andDo(print()).andExpect(status().isOk()).andExpect(content().json(
+        mockMvc.perform(get("/customers?firstName=john&lastName=doE")).andDo(print()).andExpect(status().isOk()).andExpect(content().json(
                 "[ { \"id\": \"1001\", \"firstName\": \"John\", \"lastName\": \"Doe\", \"age\": 20, \"currentLivingAddress\": { \"street\": \"SOMESTREET\", \"houseNumber\": \"200\", \"city\": \"Amsterdam\", \"zipCode\": \"1928ZP\" } } ]"));
     }
 
     @Test
     void testUpdateCustomerAddress() throws Exception {
-        mockMvc.perform(patch("/customers/1003").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(put("/customers/1003/address").contentType(MediaType.APPLICATION_JSON)
                 .content("{ \"street\": \"SOMESTREESAT\", \"houseNumber\": \"4200\", \"city\": \"Amsterdam\", \"zipCode\": \"1980ST\" }")).andDo(print())
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(patch("/customers/2001").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(put("/customers/2001/address").contentType(MediaType.APPLICATION_JSON)
                 .content("{ \"street\": \"SOMESTREESAT\", \"houseNumber\": \"4200\", \"city\": \"Amsterdam\", \"zipCode\": \"1980ST\" }")).andDo(print())
                 .andExpect(status().isNotFound()).andExpect(jsonPath("$.status", is("NOT_FOUND")))
                 .andExpect(jsonPath("$.message", is("Customer with Id 2001 not found"))).andExpect(jsonPath("$.timestamp", is(notNullValue())));
 
-        mockMvc.perform(patch("/customers/1003").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(put("/customers/1003/address").contentType(MediaType.APPLICATION_JSON)
                 .content("{ \"street\": \"\", \"houseNumber\": \"4200\", \"city\": \"Amsterdam\", \"zipCode\": \"1980ST\" }")).andDo(print())
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.[0].message", is("Street name is mandatory for address")));
     }

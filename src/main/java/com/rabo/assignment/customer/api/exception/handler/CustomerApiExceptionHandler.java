@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +30,8 @@ import com.rabo.assignment.customer.api.exception.CustomerNotFoundException;
 @RestControllerAdvice
 public class CustomerApiExceptionHandler extends ResponseEntityExceptionHandler {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CustomerApiExceptionHandler.class);
+
     /**
      * Exception handler for {@link CustomerNotFoundException} with proper json
      * structure to show error.
@@ -38,7 +42,8 @@ public class CustomerApiExceptionHandler extends ResponseEntityExceptionHandler 
      */
     @ExceptionHandler(value = CustomerNotFoundException.class)
     @ResponseStatus(code = HttpStatus.NOT_FOUND)
-    public ApiError handleNotFoundException(RuntimeException exception) {
+    public ApiError handleNotFoundException(CustomerNotFoundException exception) {
+        LOG.error("Customer not found exception {}", exception);
         return new ApiError(HttpStatus.NOT_FOUND, LocalDateTime.now(), exception.getMessage());
     }
 
@@ -48,9 +53,24 @@ public class CustomerApiExceptionHandler extends ResponseEntityExceptionHandler 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status,
             WebRequest request) {
+        LOG.error("Validation Error {}", ex);
         List<ApiError> errorList = ex.getBindingResult().getFieldErrors().stream().map(fieldError -> {
             return new ApiError(HttpStatus.BAD_REQUEST, LocalDateTime.now(), fieldError.getDefaultMessage());
         }).collect(Collectors.toList());
         return handleExceptionInternal(ex, errorList, headers, HttpStatus.BAD_REQUEST, request);
+    }
+
+    /**
+     * Generic exception handler for all {@link Exception} clas
+     * 
+     * @param ex
+     *            {@link Exception} to be handled
+     * @return generic api error response.
+     */
+    @ExceptionHandler(value = Exception.class)
+    @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
+    public ApiError genericExceptionHandler(Exception ex) {
+        LOG.error("Exception in application {}", ex);
+        return new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, LocalDateTime.now(), "Internal Server ERROR");
     }
 }
