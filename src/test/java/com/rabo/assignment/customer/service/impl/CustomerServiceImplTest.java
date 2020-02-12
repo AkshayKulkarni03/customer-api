@@ -1,7 +1,6 @@
 package com.rabo.assignment.customer.service.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -72,7 +71,7 @@ public class CustomerServiceImplTest {
 
         List<Customer> list = new ArrayList<>();
         list.addAll(Arrays.asList(customer1, customer2));
-        Page<Customer> pagedTasks = new PageImpl(list);
+        Page<Customer> pagedTasks = new PageImpl<Customer>(list);
         when(customerRepository.findAll(any(Pageable.class))).thenReturn(pagedTasks);
 
         List<Customer> result = unitToTest.getAllCustomers(0);
