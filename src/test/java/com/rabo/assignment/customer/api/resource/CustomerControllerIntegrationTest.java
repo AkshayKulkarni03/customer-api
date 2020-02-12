@@ -35,13 +35,13 @@ public class CustomerControllerIntegrationTest {
     @Test
     void testAddNewCustomer() throws Exception {
         mockMvc.perform(post("/customers").contentType(MediaType.APPLICATION_JSON).content(
-                "{ \"firstName\": \"TestFirstName\", \"lastName\": \"TestLastName\", \"age\": 29, \"address\": { \"street\": \"SOMESTREET\", \"houseNumber\": \"400\", \"city\": \"Amsterdam\", \"zipCode\": \"1928ZP\" } }"))
+                "{ \"firstName\": \"TestFirstName\", \"lastName\": \"TestLastName\", \"dateOfBirth\":\"1997-03-12\", \"address\": { \"street\": \"SOMESTREET\", \"houseNumber\": \"400\", \"city\": \"Amsterdam\", \"zipCode\": \"1928ZP\" } }"))
                 .andDo(print()).andExpect(status().isOk());
         mockMvc.perform(post("/customers").contentType(MediaType.APPLICATION_JSON).content(
-                "{ \"firstName\": \"TestFirstName\", \"lastName\": \"TestLastName\", \"age\": 29, \"address\": { \"street\": \"SOMESTREET\",\"city\": \"Amsterdam\", \"zipCode\": \"1928ZP\" } }"))
+                "{ \"firstName\": \"TestFirstName\", \"lastName\": \"TestLastName\", \"dateOfBirth\":\"1997-03-12\", \"address\": { \"street\": \"SOMESTREET\",\"city\": \"Amsterdam\", \"zipCode\": \"1928ZP\" } }"))
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.[0].message", is("House number is mandatory for address")));
         mockMvc.perform(post("/customers").contentType(MediaType.APPLICATION_JSON).content(
-                "{ \"firstName\": \"TestFirstName\", \"lastName\": \"\", \"age\": 29, \"address\": { \"houseNumber\": \"400\", \"city\": \"Amsterdam\", \"zipCode\": \"1928ZP\" } }"))
+                "{ \"firstName\": \"TestFirstName\", \"lastName\": \"\", \"dateOfBirth\":\"1997-03-12\", \"address\": { \"houseNumber\": \"400\", \"city\": \"Amsterdam\", \"zipCode\": \"1928ZP\" } }"))
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$").isArray()).andExpect(status().isBadRequest()).andExpect(jsonPath("$", hasSize(2)));
     }
 
@@ -54,7 +54,7 @@ public class CustomerControllerIntegrationTest {
     @Test
     void testGetCustomerById() throws Exception {
         mockMvc.perform(get("/customers/1001")).andDo(print()).andExpect(status().isOk()).andExpect(content().json(
-                "{ \"id\": \"1001\", \"firstName\": \"John\", \"lastName\": \"Doe\", \"age\": 20, \"currentLivingAddress\": { \"street\": \"SOMESTREET\", \"houseNumber\": \"200\", \"city\": \"Amsterdam\", \"zipCode\": \"1928ZP\" }}"));
+                "{\"id\":\"1001\",\"customerId\":1001,\"firstName\":\"John\",\"lastName\":\"Doe\",\"dateOfBirth\":\"2000-01-20\",\"age\":20,\"currentLivingAddress\":{\"street\":\"SOMESTREET\",\"houseNumber\":\"200\",\"city\":\"Amsterdam\",\"zipCode\":\"1928ZP\"}}"));
 
         mockMvc.perform(get("/customers/2001")).andDo(print()).andExpect(status().isNotFound()).andExpect(jsonPath("$.status", is("NOT_FOUND")))
                 .andExpect(jsonPath("$.message", is("Customer with Id 2001 not found"))).andExpect(jsonPath("$.timestamp", is(notNullValue())));
@@ -63,11 +63,11 @@ public class CustomerControllerIntegrationTest {
 
     @Test
     void testGetCustomerByName() throws Exception {
-        mockMvc.perform(get("/customers?firstName=john")).andDo(print()).andExpect(status().isOk()).andExpect(content().json(
+        mockMvc.perform(get("/customers/search?firstName=john")).andDo(print()).andExpect(status().isOk()).andExpect(content().json(
                 "[ { \"id\": \"1001\", \"firstName\": \"John\", \"lastName\": \"Doe\", \"age\": 20, \"currentLivingAddress\": { \"street\": \"SOMESTREET\", \"houseNumber\": \"200\", \"city\": \"Amsterdam\", \"zipCode\": \"1928ZP\" } } ]"));
-        mockMvc.perform(get("/customers?lastName=doE")).andDo(print()).andExpect(status().isOk()).andExpect(content().json(
+        mockMvc.perform(get("/customers/search?lastName=doE")).andDo(print()).andExpect(status().isOk()).andExpect(content().json(
                 "[ { \"id\": \"1001\", \"firstName\": \"John\", \"lastName\": \"Doe\", \"age\": 20, \"currentLivingAddress\": { \"street\": \"SOMESTREET\", \"houseNumber\": \"200\", \"city\": \"Amsterdam\", \"zipCode\": \"1928ZP\" } } ]"));
-        mockMvc.perform(get("/customers?firstName=john&lastName=doE")).andDo(print()).andExpect(status().isOk()).andExpect(content().json(
+        mockMvc.perform(get("/customers/search?firstName=john&lastName=doE")).andDo(print()).andExpect(status().isOk()).andExpect(content().json(
                 "[ { \"id\": \"1001\", \"firstName\": \"John\", \"lastName\": \"Doe\", \"age\": 20, \"currentLivingAddress\": { \"street\": \"SOMESTREET\", \"houseNumber\": \"200\", \"city\": \"Amsterdam\", \"zipCode\": \"1928ZP\" } } ]"));
     }
 

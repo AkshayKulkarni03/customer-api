@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -47,21 +48,21 @@ public class CustomerControllerTest {
         MockHttpServletRequest request = new MockHttpServletRequest();
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
-        when(customerService.addNewCustomer(any(Customer.class))).thenReturn("101");
+        when(customerService.addNewCustomer(any(Customer.class))).thenReturn(101L);
 
         CustomerRequest customerToAdd = new CustomerRequest();
         customerToAdd.setFirstName("Test FirstName");
         customerToAdd.setLastName("Test LastName");
-        customerToAdd.setAge(100);
+        customerToAdd.setDateOfBirth(LocalDate.of(2000, 1, 12));
 
         CustomerAddressRequest currentLivingAddress = new CustomerAddressRequest("Test Street", "House Number", "Test City", "Test ZipCode");
 
         customerToAdd.setAddress(currentLivingAddress);
 
-        ResponseEntity<String> responseEntity = unitToTest.addNewCustomer(customerToAdd);
+        ResponseEntity<Long> responseEntity = unitToTest.addNewCustomer(customerToAdd);
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isEqualTo("101");
+        assertThat(responseEntity.getBody()).isEqualTo(101L);
 
     }
 
@@ -70,9 +71,10 @@ public class CustomerControllerTest {
         Customer customer1 = getCustomer();
 
         Customer customer2 = new Customer();
-        customer2.setAge(20);
         customer2.setFirstName("FirstName2");
         customer2.setLastName("LastName2");
+        customer2.setDateOfBirth(LocalDate.of(1999, 12, 1));
+        customer2.setAge(21);
 
         Address address2 = new Address();
         address2.setCity("TestCity2");
@@ -86,9 +88,9 @@ public class CustomerControllerTest {
         ArrayList<Customer> list = new ArrayList<>();
         list.addAll(Arrays.asList(customer1, customer2));
 
-        when(customerService.getAllCustomers()).thenReturn(list);
+        when(customerService.getAllCustomers(0)).thenReturn(list);
 
-        ResponseEntity<List<Customer>> responseEntity = unitToTest.getCustomers(Optional.empty(), Optional.empty());
+        ResponseEntity<List<Customer>> responseEntity = unitToTest.getAllCustomers(0);
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody().size()).isEqualTo(2);
@@ -101,9 +103,9 @@ public class CustomerControllerTest {
     void testGetCustomerById() {
         Customer customer = getCustomer();
 
-        when(customerService.getCustomerById("101")).thenReturn(customer);
+        when(customerService.getCustomerById(101L)).thenReturn(customer);
 
-        ResponseEntity<Customer> responseEntity = unitToTest.getCustomerById("101");
+        ResponseEntity<Customer> responseEntity = unitToTest.getCustomerById(101L);
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody().getFirstName()).isEqualTo(customer.getFirstName());
@@ -111,9 +113,9 @@ public class CustomerControllerTest {
 
     @Test
     void testGetCustomerByIdThrowsException() {
-        when(customerService.getCustomerById("102")).thenThrow(new CustomerNotFoundException("Customer with Id 102 not found"));
+        when(customerService.getCustomerById(102L)).thenThrow(new CustomerNotFoundException("Customer with Id 102 not found"));
         CustomerNotFoundException exception = assertThrows(CustomerNotFoundException.class, () -> {
-            unitToTest.getCustomerById("102");
+            unitToTest.getCustomerById(102L);
         });
         assertEquals("Customer with Id 102 not found", exception.getMessage());
     }
@@ -166,9 +168,9 @@ public class CustomerControllerTest {
         currentLivingAddress.setStreet("Test Street");
         currentLivingAddress.setZipCode("Test ZipCode");
 
-        doNothing().when(customerService).updateCustomerAddress(eq("101"), any(Address.class));
+        doNothing().when(customerService).updateCustomerAddress(eq(101L), any(Address.class));
 
-        ResponseEntity<Void> responseEntity = unitToTest.updateCustomerAddress("101", currentLivingAddress);
+        ResponseEntity<Void> responseEntity = unitToTest.updateCustomerAddress(101L, currentLivingAddress);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     }
@@ -181,9 +183,9 @@ public class CustomerControllerTest {
         currentLivingAddress.setStreet("Test Street");
         currentLivingAddress.setZipCode("Test ZipCode");
 
-        doThrow(new CustomerNotFoundException("Customer with Id 102 not found")).when(customerService).updateCustomerAddress(eq("102"), any(Address.class));
+        doThrow(new CustomerNotFoundException("Customer with Id 102 not found")).when(customerService).updateCustomerAddress(eq(102L), any(Address.class));
         CustomerNotFoundException exception = assertThrows(CustomerNotFoundException.class, () -> {
-            unitToTest.updateCustomerAddress("102", currentLivingAddress);
+            unitToTest.updateCustomerAddress(102L, currentLivingAddress);
         });
         assertEquals("Customer with Id 102 not found", exception.getMessage());
     }
@@ -196,11 +198,11 @@ public class CustomerControllerTest {
         currentLivingAddress.setStreet("Test Street");
         currentLivingAddress.setZipCode("Test ZipCode");
 
-        doThrow(new CustomerNotFoundException("Customer Address for Id 102 not found")).when(customerService).updateCustomerAddress(eq("102"),
+        doThrow(new CustomerNotFoundException("Customer Address for Id 102 not found")).when(customerService).updateCustomerAddress(eq(102L),
                 any(Address.class));
 
         CustomerNotFoundException exception = assertThrows(CustomerNotFoundException.class, () -> {
-            unitToTest.updateCustomerAddress("102", currentLivingAddress);
+            unitToTest.updateCustomerAddress(102L, currentLivingAddress);
         });
         assertEquals("Customer Address for Id 102 not found", exception.getMessage());
     }
@@ -208,9 +210,12 @@ public class CustomerControllerTest {
     private Customer getCustomer() {
         Customer customer = new Customer();
         customer.setId("101");
+        customer.setCustomerId(101L);
         customer.setAge(20);
         customer.setFirstName("FirstName1");
         customer.setLastName("LastName1");
+        customer.setDateOfBirth(LocalDate.of(1998, 12, 1));
+        customer.setAge(22);
 
         Address address = new Address();
         address.setCity("TestCity1");

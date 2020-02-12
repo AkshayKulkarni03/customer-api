@@ -1,8 +1,10 @@
 package com.rabo.assignment.customer.data.model;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -33,18 +35,21 @@ import lombok.Setter;
 @Entity
 public class Customer implements Serializable {
 
-	@Getter(value = AccessLevel.NONE)
-	@Setter(value = AccessLevel.NONE)
-	private static final long serialVersionUID = -3946148493430610912L;
+    @Getter(value = AccessLevel.NONE)
+    @Setter(value = AccessLevel.NONE)
+    private static final long serialVersionUID = -3946148493430610912L;
 
-	@Id
-	@GeneratedValue(generator = "system-uuid")
-	@GenericGenerator(name = "system-uuid", strategy = "uuid")
-	private String id;
-	private String firstName;
-	private String lastName;
-	private Integer age;
-	@OneToOne(cascade = CascadeType.ALL, mappedBy = "customer", fetch = FetchType.LAZY)
-	private Address currentLivingAddress;
+    @Id
+    @GeneratedValue(generator = "system-uuid")
+    @GenericGenerator(name = "system-uuid", strategy = "uuid")
+    private String id;
+    @Column(unique = true, nullable = false)
+    private Long customerId;
+    private String firstName;
+    private String lastName;
+    private LocalDate dateOfBirth;
+    private Integer age;
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "customer", fetch = FetchType.LAZY)
+    private Address currentLivingAddress;
 
 }

@@ -20,14 +20,17 @@ public interface CustomerService {
      *            {@link Customer} information of the customer
      * @return unique id assigned to the customer.
      */
-    public String addNewCustomer(Customer customer);
+    public Long addNewCustomer(Customer customer);
 
     /**
      * Get list of all customers without any filters
      * 
+     * @param pageNumber
+     *            for pagination page number can be used with default size of
+     *            100 elements per page
      * @return list of {@link Customer}s
      */
-    public List<Customer> getAllCustomers();
+    public List<Customer> getAllCustomers(Integer pageNumber);
 
     /**
      * Find customer by first name and/or last name
@@ -47,7 +50,7 @@ public interface CustomerService {
      *            unique id of the customer to be searched
      * @return {@link Customer} matching criteria
      */
-    public Customer getCustomerById(String id);
+    public Customer getCustomerById(Long id);
 
     /**
      * Update the customers address.
@@ -58,5 +61,5 @@ public interface CustomerService {
      * @param address
      *            {@link Address} of the customer to be added
      */
-    public void updateCustomerAddress(String id, Address address);
+    public void updateCustomerAddress(Long id, Address address);
 }

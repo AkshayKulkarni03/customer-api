@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.rabo.assignment.customer.api.exception.CustomerNotFoundException;
@@ -32,15 +34,16 @@ public class CustomerServiceImpl implements CustomerService {
     private AddressRepository addressRepository;
 
     @Override
-    public String addNewCustomer(Customer customer) {
+    public Long addNewCustomer(Customer customer) {
         Customer newCustomer = customerRepository.saveAndFlush(customer);
-        return newCustomer.getId();
+        return newCustomer.getCustomerId();
     }
 
     @Override
-    public List<Customer> getAllCustomers() {
+    public List<Customer> getAllCustomers(Integer pageNumber) {
+        PageRequest pageRequest = PageRequest.of(pageNumber, 100, Sort.by("firstName"));
         List<Customer> result = new ArrayList<>();
-        Iterable<Customer> all = customerRepository.findAll();
+        Iterable<Customer> all = customerRepository.findAll(pageRequest);
         all.iterator().forEachRemaining(result::add);
         return result;
     }
@@ -59,14 +62,14 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Customer getCustomerById(String id) {
-        Optional<Customer> optionalCustomer = customerRepository.findById(id);
+    public Customer getCustomerById(Long id) {
+        Optional<Customer> optionalCustomer = customerRepository.findByCustomerId(id);
         return optionalCustomer.orElseThrow(() -> new CustomerNotFoundException(String.format("Customer with Id %s not found", id)));
     }
 
     @Override
-    public void updateCustomerAddress(String id, Address address) {
-        Optional<Customer> optionalCustomer = customerRepository.findById(id);
+    public void updateCustomerAddress(Long id, Address address) {
+        Optional<Customer> optionalCustomer = customerRepository.findByCustomerId(id);
         Customer customer = optionalCustomer.orElseThrow(() -> new CustomerNotFoundException(String.format("Customer with Id %s not found", id)));
 
         Optional<Address> optionalAddress = addressRepository.findById(customer.getId());

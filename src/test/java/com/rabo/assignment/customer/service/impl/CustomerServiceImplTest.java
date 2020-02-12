@@ -1,11 +1,13 @@
 package com.rabo.assignment.customer.service.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +18,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import com.rabo.assignment.customer.api.exception.CustomerNotFoundException;
 import com.rabo.assignment.customer.data.model.Address;
@@ -39,11 +44,12 @@ public class CustomerServiceImplTest {
     void testAddNewCustomer() {
         Customer customer = new Customer();
         customer.setId("101");
+        customer.setCustomerId(101L);
         when(customerRepository.saveAndFlush(any(Customer.class))).thenReturn(customer);
 
-        String result = unitToTest.addNewCustomer(getCustomer());
+        Long result = unitToTest.addNewCustomer(getCustomer());
 
-        assertEquals("101", result);
+        assertEquals(101L, result);
     }
 
     @Test
@@ -66,10 +72,10 @@ public class CustomerServiceImplTest {
 
         List<Customer> list = new ArrayList<>();
         list.addAll(Arrays.asList(customer1, customer2));
+        Page<Customer> pagedTasks = new PageImpl(list);
+        when(customerRepository.findAll(any(Pageable.class))).thenReturn(pagedTasks);
 
-        when(customerRepository.findAll()).thenReturn(list);
-
-        List<Customer> result = unitToTest.getAllCustomers();
+        List<Customer> result = unitToTest.getAllCustomers(0);
 
         assertThat(result).isEqualTo(list);
     }
@@ -112,18 +118,18 @@ public class CustomerServiceImplTest {
     void testGetCustomerById() {
         Customer customer = getCustomer();
 
-        when(customerRepository.findById("101")).thenReturn(Optional.of(customer));
+        when(customerRepository.findByCustomerId(101L)).thenReturn(Optional.of(customer));
 
-        Customer result = unitToTest.getCustomerById("101");
+        Customer result = unitToTest.getCustomerById(101L);
         assertThat(result).isEqualTo(customer);
     }
 
     @Test
     void testGetCustomerByIdThrowsException() {
-        when(customerRepository.findById("102")).thenReturn(Optional.empty());
+        when(customerRepository.findByCustomerId(102L)).thenReturn(Optional.empty());
 
         CustomerNotFoundException exception = assertThrows(CustomerNotFoundException.class, () -> {
-            unitToTest.getCustomerById("102");
+            unitToTest.getCustomerById(102L);
         });
         assertEquals("Customer with Id 102 not found", exception.getMessage());
     }
@@ -139,10 +145,10 @@ public class CustomerServiceImplTest {
         inputAddressTobeAdded.setStreet("Test Street");
         inputAddressTobeAdded.setZipCode("Test ZipCode");
 
-        when(customerRepository.findById("101")).thenReturn(Optional.of(customer));
+        when(customerRepository.findByCustomerId(101L)).thenReturn(Optional.of(customer));
         when(addressRepository.findById("101")).thenReturn(Optional.of(address));
 
-        unitToTest.updateCustomerAddress("101", inputAddressTobeAdded);
+        unitToTest.updateCustomerAddress(101L, inputAddressTobeAdded);
 
         assertThat(address.getZipCode()).isEqualTo(inputAddressTobeAdded.getZipCode());
     }
@@ -155,9 +161,9 @@ public class CustomerServiceImplTest {
         inputAddressTobeAdded.setStreet("Test Street");
         inputAddressTobeAdded.setZipCode("Test ZipCode");
 
-        when(customerRepository.findById("102")).thenReturn(Optional.empty());
+        when(customerRepository.findByCustomerId(102L)).thenReturn(Optional.empty());
         CustomerNotFoundException exception = assertThrows(CustomerNotFoundException.class, () -> {
-            unitToTest.updateCustomerAddress("102", inputAddressTobeAdded);
+            unitToTest.updateCustomerAddress(102L, inputAddressTobeAdded);
         });
         assertEquals("Customer with Id 102 not found", exception.getMessage());
     }
@@ -171,10 +177,10 @@ public class CustomerServiceImplTest {
         inputAddressTobeAdded.setStreet("Test Street");
         inputAddressTobeAdded.setZipCode("Test ZipCode");
 
-        when(customerRepository.findById("102")).thenReturn(Optional.of(customer));
+        when(customerRepository.findByCustomerId(102L)).thenReturn(Optional.of(customer));
         when(addressRepository.findById("101")).thenReturn(Optional.empty());
         CustomerNotFoundException exception = assertThrows(CustomerNotFoundException.class, () -> {
-            unitToTest.updateCustomerAddress("102", inputAddressTobeAdded);
+            unitToTest.updateCustomerAddress(102L, inputAddressTobeAdded);
         });
         assertEquals("Customer Address for Id 102 not found", exception.getMessage());
     }
@@ -182,9 +188,12 @@ public class CustomerServiceImplTest {
     private Customer getCustomer() {
         Customer customer = new Customer();
         customer.setId("101");
+        customer.setCustomerId(101L);
         customer.setAge(20);
         customer.setFirstName("FirstName1");
         customer.setLastName("LastName1");
+        customer.setDateOfBirth(LocalDate.of(1998, 12, 1));
+        customer.setAge(22);
 
         Address address = new Address();
         address.setCity("TestCity1");
