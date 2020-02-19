@@ -51,15 +51,16 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	@Override
-	public List<Customer> getCustomersByName(String firstName, String lastName) {
+	public List<Customer> getCustomersByName(Integer pageNumber, String firstName, String lastName) {
 		List<Customer> result = new ArrayList<>();
+		PageRequest pageRequest = PageRequest.of(pageNumber, 100, Sort.by("firstName"));
 		if (StringUtils.isNoneBlank(firstName, lastName)) {
-			result.addAll(
-					customerRepository.findByFirstNameIgnoreCaseContainingAndLastNameIgnoreCase(firstName, lastName));
+			result.addAll(customerRepository.findByFirstNameIgnoreCaseContainingAndLastNameIgnoreCase(firstName,
+					lastName, pageRequest));
 		} else if (StringUtils.isNotBlank(firstName)) {
-			result.addAll(customerRepository.findByFirstNameIgnoreCase(firstName));
+			result.addAll(customerRepository.findByFirstNameIgnoreCase(firstName, pageRequest));
 		} else if (StringUtils.isNotBlank(lastName)) {
-			result.addAll(customerRepository.findByLastNameIgnoreCase(lastName));
+			result.addAll(customerRepository.findByLastNameIgnoreCase(lastName, pageRequest));
 		}
 		return result;
 	}

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
@@ -84,9 +85,9 @@ public class CustomerServiceImplTest {
 		Customer customer = getCustomer();
 		List<Customer> list = new ArrayList<>();
 		list.add(customer);
-		when(customerRepository.findByFirstNameIgnoreCase("firstName1")).thenReturn(list);
+		when(customerRepository.findByFirstNameIgnoreCase(eq("firstName1"), any(Pageable.class))).thenReturn(list);
 
-		List<Customer> result = unitToTest.getCustomersByName("firstName1", "");
+		List<Customer> result = unitToTest.getCustomersByName(0, "firstName1", "");
 		assertThat(result).isEqualTo(list);
 	}
 
@@ -96,9 +97,9 @@ public class CustomerServiceImplTest {
 		List<Customer> list = new ArrayList<>();
 		list.add(customer);
 
-		when(customerRepository.findByLastNameIgnoreCase("lastname1")).thenReturn(list);
+		when(customerRepository.findByLastNameIgnoreCase(eq("lastname1"), any(Pageable.class))).thenReturn(list);
 
-		List<Customer> result = unitToTest.getCustomersByName(null, "lastname1");
+		List<Customer> result = unitToTest.getCustomersByName(0, null, "lastname1");
 		assertThat(result).isEqualTo(list);
 	}
 
@@ -107,10 +108,10 @@ public class CustomerServiceImplTest {
 		Customer customer = getCustomer();
 		List<Customer> list = new ArrayList<>();
 		list.add(customer);
-		when(customerRepository.findByFirstNameIgnoreCaseContainingAndLastNameIgnoreCase("firstName1", "lastname1"))
-				.thenReturn(list);
+		when(customerRepository.findByFirstNameIgnoreCaseContainingAndLastNameIgnoreCase(eq("firstName1"),
+				eq("lastname1"), any(Pageable.class))).thenReturn(list);
 
-		List<Customer> result = unitToTest.getCustomersByName("firstName1", "lastname1");
+		List<Customer> result = unitToTest.getCustomersByName(0, "firstName1", "lastname1");
 		assertThat(result).isEqualTo(list);
 	}
 

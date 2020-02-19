@@ -99,38 +99,28 @@ public class CustomerController {
 	}
 
 	/**
-	 * Get all customers
+	 * Search for customer based on first name and/or last name of customer, all
+	 * parameters are optional for search. if no parameters are set will fetch all
+	 * customers based on pageNumber
 	 * 
+	 * @param firstName  first name of customer to be searched.
+	 * @param lastName   last name of customer to be searched.
 	 * @param pageNumber for pagination page number can be used with default size of
 	 *                   100 elements per page
-	 * @return list of {@link Customer} with matching criteria
-	 */
-	@GetMapping(produces = APPLICATION_JSON_VALUE)
-	public ResponseEntity<List<Customer>> getAllCustomers(
-			@RequestParam(name = "pageNumber", required = false, defaultValue = "0") Integer pageNumber) {
-		LOG.info("Get All Customers");
-		List<Customer> result = new ArrayList<>();
-		result.addAll(customerService.getAllCustomers(pageNumber));
-		return ResponseEntity.ok(result);
-	}
-
-	/**
-	 * Search for customer based on first name and/or last name of customer, all
-	 * parameters are optional for search.
-	 * 
-	 * @param firstName first name of customer to be searched.
-	 * @param lastName  last name of customer to be searched.
 	 * @return list of {@link Customer} with matching criteria or else empty list
 	 *         will be returned.
 	 */
-	@GetMapping(value = "/search", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@GetMapping(produces = APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<Customer>> getCustomers(
 			@RequestParam(name = "firstName", required = false) Optional<String> firstName,
-			@RequestParam(name = "lastName", required = false) Optional<String> lastName) {
+			@RequestParam(name = "lastName", required = false) Optional<String> lastName,
+			@RequestParam(name = "pageNumber", required = false, defaultValue = "0") Integer pageNumber) {
 		LOG.info("Get All Customers or filter based on criteria");
 		List<Customer> result = new ArrayList<>();
 		if (firstName.isPresent() || lastName.isPresent()) {
-			result.addAll(customerService.getCustomersByName(firstName.orElse(""), lastName.orElse("")));
+			result.addAll(customerService.getCustomersByName(pageNumber, firstName.orElse(""), lastName.orElse("")));
+		} else {
+			result.addAll(customerService.getAllCustomers(pageNumber));
 		}
 		return ResponseEntity.ok(result);
 	}

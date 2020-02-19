@@ -67,13 +67,13 @@ public class CustomerControllerIntegrationTest {
 
 	@Test
 	void testGetCustomerByName() throws Exception {
-		mockMvc.perform(get("/customers/search?firstName=john")).andDo(print()).andExpect(status().isOk())
+		mockMvc.perform(get("/customers?firstName=john")).andDo(print()).andExpect(status().isOk())
 				.andExpect(content().json(
 						"[ { \"id\": \"1001\", \"firstName\": \"John\", \"lastName\": \"Doe\", \"age\": 20, \"currentLivingAddress\": { \"street\": \"SOMESTREET\", \"houseNumber\": \"200\", \"city\": \"Amsterdam\", \"zipCode\": \"1928ZP\" } } ]"));
-		mockMvc.perform(get("/customers/search?lastName=doE")).andDo(print()).andExpect(status().isOk())
+		mockMvc.perform(get("/customers?lastName=doE")).andDo(print()).andExpect(status().isOk())
 				.andExpect(content().json(
 						"[ { \"id\": \"1001\", \"firstName\": \"John\", \"lastName\": \"Doe\", \"age\": 20, \"currentLivingAddress\": { \"street\": \"SOMESTREET\", \"houseNumber\": \"200\", \"city\": \"Amsterdam\", \"zipCode\": \"1928ZP\" } } ]"));
-		mockMvc.perform(get("/customers/search?firstName=john&lastName=doE")).andDo(print()).andExpect(status().isOk())
+		mockMvc.perform(get("/customers?firstName=john&lastName=doE")).andDo(print()).andExpect(status().isOk())
 				.andExpect(content().json(
 						"[ { \"id\": \"1001\", \"firstName\": \"John\", \"lastName\": \"Doe\", \"age\": 20, \"currentLivingAddress\": { \"street\": \"SOMESTREET\", \"houseNumber\": \"200\", \"city\": \"Amsterdam\", \"zipCode\": \"1928ZP\" } } ]"));
 	}
