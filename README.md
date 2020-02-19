@@ -1,6 +1,7 @@
 # Customer-API
 
 [![Build Status](https://travis-ci.com/AkshayKulkarni03/customer-api.svg?branch=master)](https://travis-ci.com/AkshayKulkarni03/customer-api)
+[![Coverage Status](https://coveralls.io/repos/github/AkshayKulkarni03/customer-api/badge.svg?branch=master)](https://coveralls.io/github/AkshayKulkarni03/customer-api?branch=master)
 
 Customer API [Spring Boot](http://projects.spring.io/spring-boot/) with embedded h2 Database.
 
