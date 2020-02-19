@@ -122,6 +122,13 @@
 				<configuration>
 					<repoToken>dtSC2d83J2QeDc18GcIof4f1FCjyw2AdI</repoToken>
 				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>javax.xml.bind</groupId>
+						<artifactId>jaxb-api</artifactId>
+						<version>2.3.1</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.jacoco</groupId>
