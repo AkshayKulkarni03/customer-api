@@ -1,4 +1,7 @@
 # Customer-API
+
+[![Build Status](https://travis-ci.com/AkshayKulkarni03/customer-api.svg?branch=master)](https://travis-ci.com/AkshayKulkarni03/customer-api)
+
 Customer API [Spring Boot](http://projects.spring.io/spring-boot/) with embedded h2 Database.
 
 ## Requirements
