@@ -11,10 +11,10 @@
 		<relativePath />
 	</parent>
 
-	<groupId>com.rabo.assignment.customer</groupId>
-	<artifactId>customer-assignment</artifactId>
+	<groupId>com.example.customer.api</groupId>
+	<artifactId>customer-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>customer-assignment</name>
+	<name>customer-api</name>
 
 	<properties>
 		<java.version>11</java.version>
