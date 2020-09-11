@@ -10,6 +10,8 @@ import java.util.Optional;
 
 import javax.validation.Valid;
 
+import org.apache.logging.log4j.core.appender.db.jdbc.DataSourceConnectionSource;
+import org.apache.logging.log4j.core.appender.db.jdbc.JdbcAppender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +82,8 @@ public class CustomerController {
 		customer.setCurrentLivingAddress(currentLivingAddress);
 
 		Long customerId = customerService.addNewCustomer(customer);
+
+		JdbcAppender.newBuilder().setConnectionSource(DataSourceConnectionSource.createConnectionSource("jndi"));
 
 		return ResponseEntity.ok(customerId);
 	}
