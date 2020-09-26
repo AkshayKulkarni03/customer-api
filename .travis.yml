@@ -4,10 +4,12 @@ jdk:
   - openjdk11
 before_install:
   - chmod +x mvnw
-after_success:
+install:
+  - mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+script:
   - mvn clean test jacoco:report coveralls:report
 before_deploy:
-  - mvn clean package
+  - mvn compile jib:build
 env:
   global:
     - secure: nxoa/NFa0kfZiHS3NZ5NyZGh21RLabNZVdDEBu7Xnpc33Cyb5858OePLxtndDg/AHeOjNH8DJ3NWLEuRkX/WNOkgOhgeldyIAqrqS+33jSneAzY98J6Ab5rvCyJq9Jf6IwtIMmGTn5yqG6myHpC3eJz+iPzfrXw7/e5uIdJ0AaRXL50gsFadHlPwsZ5eXgFAfCbivf3HcE6PTp8me3NkavoFQnsCkWMbJ08TYeewo8uDtZ/cmFmQTSrA0dCdXVOmiydISeFcW17SzV6sqtN6VCLrr6BQR9Qded1NpOCAPZUJjoPKXeJFAk8FvdXcmzBNKZLkMKpMR5CeM8/17DjW43thFjj7AP41BCzy0z9b/WEZUdLrT/y3RaDssKBxKXkrl81kjxYyQQmk1xU13MMBCG9GiTefmtqSzPQt9ovAnFcnr1HTTULUXQtJKzqCQswAf3LaxjH7LUBMf2foi936wVZXCbuB3Z+ZHINTvAcQC5j1M+KL73uJwM+ad+IQbg74URRcwFE0yU3tY4qgMvSqIZrxN3IG0Ubm66PfJ4OsyyYNQV5TotkTqMz0T/RJS5RtcWpc74NpO8bdzaNYcZmG7tKKv6levyqlNngFMq3qMjdH0m8jIr+YdRM7r1UUMbVbnluZcXC/AQ6klcGrvjXEFOeqBmvnvbpi1/Wkpp3xrEU=
