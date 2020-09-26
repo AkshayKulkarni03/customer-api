@@ -15,6 +15,8 @@
     <version>${revision}</version>
     <name>customer-api</name>
 
+    <packaging>jar</packaging>
+
     <properties>
         <java.version>11</java.version>
         <revision>0.0.1-SNAPSHOT</revision>
@@ -65,6 +67,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+            <scope>runtime</scope>
         </dependency>
 
         <dependency>
@@ -132,8 +135,51 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>com.example.customer.CustomerAssignmentApplication</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build-info</goal>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mainClass>com.example.customer.CustomerAssignmentApplication</mainClass>
+                    <classifier>dist</classifier>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.springframework.cloud</groupId>
+                            <artifactId>spring-cloud-deployer-spi-scheduler-test-app</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.eluder.coveralls</groupId>
@@ -183,12 +229,11 @@
                 <version>${jib-maven-plugin.version}</version>
                 <configuration>
                     <from>
-                        <!--<image>adoptopenjdk/openjdk11:alpine</image>-->
+                        <!-- <image>adoptopenjdk/openjdk11:alpine</image> -->
                         <image>gcr.io/distroless/java:11</image>
                     </from>
                     <to>
                         <image>${image-path}</image>
-
                         <auth>
                             <username>${DOCKER_USERNAME}</username>
                             <password>${DOCKER_PASSWORD}</password>
@@ -198,20 +243,15 @@
                         </tags>
                     </to>
                     <container>
+                        <ports>
+                            <port>8080</port>
+                        </ports>
                         <jvmFlags>
                             <jvmFlag>-Xms512m</jvmFlag>
                             <jvmFlag>-Xmx1024m</jvmFlag>
                         </jvmFlags>
                     </container>
                 </configuration>
-                <!--<executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                    </execution>
-                </executions>-->
             </plugin>
         </plugins>
     </build>

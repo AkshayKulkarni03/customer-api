@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer-api
+spec:
+  replicas: 2
+  progressDeadlineSeconds: 600
+  revisionHistoryLimit: 2
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: customer-api
+  template:
+    metadata:
+      labels:
+        app: customer-api
+    spec:
+      imagePullSecrets:
+        - name: hubdockersecret
+      containers:
+        - name: customer-api
+          image: akshaykulkarni/customer-api:latest
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              memory: "256Mi"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+            - containerPort: 8080
+              name: service
+              protocol: TCP
+            - containerPort: 8081
+              name: management
+              protocol: TCP
+          # livenessProbe:
+          #   failureThreshold: 3
+          #   httpGet:
+          #     path: /actuator/health
+          #     port: 8081
+          #     scheme: HTTP
+          #   initialDelaySeconds: 10
+          #   periodSeconds: 10
+          #   successThreshold: 1
+          #   timeoutSeconds: 3
+          # readinessProbe:
+          #   failureThreshold: 1
+          #   httpGet:
+          #     path: /actuator/health
+          #     port: 8081
+          #     scheme: HTTP
+          #   initialDelaySeconds: 10
+          #   periodSeconds: 10
+          #   successThreshold: 1
+          #   timeoutSeconds: 3
+          volumeMounts:
+            - mountPath: /var/log/applog/plain
+              name: logging-plain
+            - mountPath: /var/log/applog/json
+              name: logging-json
+            - mountPath: /var/log/applog/spring-boot
+              name: logging-spring-boot
+      volumes:
+        - name: logging-plain
+          hostPath:
+            path: /var/log/applog/plain
+            type: DirectoryOrCreate
+        - name: logging-json
+          hostPath:
+            path: /var/log/applog/json
+            type: DirectoryOrCreate
+        - name: logging-spring-boot
+          hostPath:
+            path: /var/log/applog/spring-boot
+            type: DirectoryOrCreate
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: customer-api
+spec:
+  rules:
+    - host: customer-api.localhost.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: customer-api
+              servicePort: http
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: customer-api
+  labels:
+    app.kubernetes.io/name: customer-api
+    app.kubernetes.io/instance: customer-api
+    k8s-app: customer-app
+spec:
+  selector:
+    app: customer-api
+    k8s-app: customer-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+    - name: service
+      port: 8080
+      targetPort: 8080
+    - name: management
+      port: 8081
+      targetPort: 8081
+  type: LoadBalancer
