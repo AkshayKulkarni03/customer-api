@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.3.2.RELEASE</version>
-        <relativePath/>
+        <relativePath />
     </parent>
 
     <groupId>com.example.customer.api</groupId>
@@ -20,6 +19,8 @@
     <properties>
         <java.version>11</java.version>
         <revision>0.0.1-SNAPSHOT</revision>
+
+        <postgresql.version>42.2.16</postgresql.version>
         <jib-maven-plugin.version>2.5.2</jib-maven-plugin.version>
         <image-path>registry.hub.docker.com/akshaykulkarni/customer-api</image-path>
 
@@ -68,6 +69,12 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${postgresql.version}</version>
         </dependency>
 
         <dependency>
@@ -249,6 +256,7 @@
                         <jvmFlags>
                             <jvmFlag>-Xms512m</jvmFlag>
                             <jvmFlag>-Xmx1024m</jvmFlag>
+                            <jvmFlag>-Dspring.profiles.active=dev</jvmFlag>
                         </jvmFlags>
                     </container>
                 </configuration>

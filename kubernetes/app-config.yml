@@ -1,7 +1,20 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-db-creds
+  namespace: customer-space
+type: Opaque
+stringData:
+  postgres_url: "jdbc:postgresql://postgres.postgresql-db:5432/postgres"
+  postgres_user: "admin"
+  postgres_password: "admin"
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: customer-api
+  namespace: customer-space
 spec:
   replicas: 2
   progressDeadlineSeconds: 600
@@ -41,6 +54,26 @@ spec:
             - containerPort: 8081
               name: management
               protocol: TCP
+          env:
+            - name: JAVA_OPTIONS
+              value: -Dspring.profiles.active=dev
+            - name: SPRING_PROFILES_ACTIVE
+              value: dev
+            - name: POSTGRES_URL
+              valueFrom:
+                secretKeyRef:
+                  key: postgres_url
+                  name: postgres-db-creds
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  key: postgres_user
+                  name: postgres-db-creds
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: postgres_password
+                  name: postgres-db-creds
           # livenessProbe:
           #   failureThreshold: 3
           #   httpGet:
@@ -83,25 +116,11 @@ spec:
             type: DirectoryOrCreate
 
 ---
-apiVersion: networking.k8s.io/v1beta1
-kind: Ingress
-metadata:
-  name: customer-api
-spec:
-  rules:
-    - host: customer-api.localhost.com
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: customer-api
-              servicePort: http
-
----
 apiVersion: v1
 kind: Service
 metadata:
   name: customer-api
+  namespace: customer-space
   labels:
     app.kubernetes.io/name: customer-api
     app.kubernetes.io/instance: customer-api
@@ -121,3 +140,19 @@ spec:
       port: 8081
       targetPort: 8081
   type: LoadBalancer
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: customer-api
+  namespace: customer-space
+spec:
+  rules:
+    - host: localhost
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: customer-api
+              servicePort: http
