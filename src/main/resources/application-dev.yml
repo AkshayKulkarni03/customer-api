@@ -5,6 +5,20 @@ spring:
         username: ${POSTGRES_USER}
         password: ${POSTGRES_PASSWORD}
     jpa:
-     hibernate:
-        ddl-auto: create-drop
-     database-platform: org.hibernate.dialect.PostgreSQL95Dialect
+        database-platform: org.hibernate.dialect.PostgreSQL95Dialect
+        hibernate:
+            ddl-auto: create
+
+management:
+    server:
+        port: 8081
+    endpoints:
+        web:
+            base-path: /actuator
+            exposure:
+                include: "*"
+    endpoint:
+        metrics:
+            enabled: true
+      
+     

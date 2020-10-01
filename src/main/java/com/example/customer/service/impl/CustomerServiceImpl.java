@@ -67,6 +67,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public Customer getCustomerById(Long id) {
+		System.out.println(id);
 		Optional<Customer> optionalCustomer = customerRepository.findByCustomerId(id);
 		return optionalCustomer
 				.orElseThrow(() -> new CustomerNotFoundException(String.format("Customer with Id %s not found", id)));

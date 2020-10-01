@@ -1,4 +1,4 @@
-package com.example.customer.api.resource;
+package com.example.customer.api.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,10 +10,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +23,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import com.example.customer.api.controller.CustomerController;
 import com.example.customer.api.exception.CustomerNotFoundException;
 import com.example.customer.api.model.CustomerAddressRequest;
 import com.example.customer.api.model.CustomerRequest;
@@ -215,7 +211,7 @@ public class CustomerControllerTest {
 
 	private Customer getCustomer() {
 		Customer customer = new Customer();
-		customer.setId("101");
+		customer.setId("9e120341-627f-32be-8393-58b5d655b751");
 		customer.setCustomerId(101L);
 		customer.setAge(20);
 		customer.setFirstName("FirstName1");

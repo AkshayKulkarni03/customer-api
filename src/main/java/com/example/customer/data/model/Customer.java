@@ -2,6 +2,7 @@ package com.example.customer.data.model;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.UUID;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -40,8 +41,8 @@ public class Customer implements Serializable {
     private static final long serialVersionUID = -3946148493430610912L;
 
     @Id
-    @GeneratedValue(generator = "system-uuid")
-    @GenericGenerator(name = "system-uuid", strategy = "uuid")
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
     private String id;
     @Column(unique = true, nullable = false)
     private Long customerId;
@@ -49,7 +50,7 @@ public class Customer implements Serializable {
     private String lastName;
     private LocalDate dateOfBirth;
     private Integer age;
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "customer", fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "customer")
     private Address currentLivingAddress;
 
 }

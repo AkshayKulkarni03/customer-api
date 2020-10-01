@@ -45,15 +45,15 @@ spec:
               memory: "256Mi"
           imagePullPolicy: Always
           ports:
-            - containerPort: 80
-              name: http
-              protocol: TCP
+            # - containerPort: 80
+            #   name: http
+            #   protocol: TCP
             - containerPort: 8080
               name: service
-              protocol: TCP
-            - containerPort: 8081
-              name: management
-              protocol: TCP
+            #   protocol: TCP
+            # - containerPort: 8081
+            #   name: management
+            #   protocol: TCP
           env:
             - name: JAVA_OPTIONS
               value: -Dspring.profiles.active=dev
@@ -121,38 +121,33 @@ kind: Service
 metadata:
   name: customer-api
   namespace: customer-space
-  labels:
-    app.kubernetes.io/name: customer-api
-    app.kubernetes.io/instance: customer-api
-    k8s-app: customer-app
 spec:
   selector:
     app: customer-api
-    k8s-app: customer-api
   ports:
-    - name: http
-      port: 80
-      targetPort: 80
+    # - name: http
+    #   port: 80
+    #   targetPort: 80
     - name: service
       port: 8080
       targetPort: 8080
-    - name: management
-      port: 8081
-      targetPort: 8081
+    # - name: management
+    #   port: 8081
+    #   targetPort: 8081
   type: LoadBalancer
-
----
-apiVersion: networking.k8s.io/v1beta1
-kind: Ingress
-metadata:
-  name: customer-api
-  namespace: customer-space
-spec:
-  rules:
-    - host: localhost
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: customer-api
-              servicePort: http
+  externalTrafficPolicy: Local
+# ---
+# apiVersion: networking.k8s.io/v1beta1
+# kind: Ingress
+# metadata:
+#   name: customer-api
+#   namespace: customer-space
+# spec:
+#   rules:
+#     - host: localhost
+#       http:
+#         paths:
+#           - path: /
+#             backend:
+#               serviceName: customer-api
+#               servicePort: http

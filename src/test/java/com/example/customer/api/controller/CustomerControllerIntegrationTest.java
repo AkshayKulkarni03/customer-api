@@ -1,14 +1,17 @@
-package com.example.customer.api.resource;
+package com.example.customer.api.controller;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -23,6 +26,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
+@ExtendWith(MockitoExtension.class)
+@ActiveProfiles("ut")
 @AutoConfigureMockMvc
 public class CustomerControllerIntegrationTest {
 
@@ -55,7 +60,7 @@ public class CustomerControllerIntegrationTest {
     @Test
     void testGetAllCustomers() throws Exception {
         mockMvc.perform(get("/customers")).andDo(print()).andExpect(status().isOk()).andExpect(content().json(
-                "[ { \"id\": \"1001\", \"firstName\": \"John\", \"lastName\": \"Doe\", \"age\": 20, \"currentLivingAddress\": { \"street\": \"SOMESTREET\", \"houseNumber\": \"200\", \"city\": \"Amsterdam\", \"zipCode\": \"1928ZP\" } }, { \"id\": \"1002\", \"firstName\": \"Charles\", \"lastName\": \"Bailey\", \"age\": 28, \"currentLivingAddress\": { \"street\": \"SOMESTREET\", \"houseNumber\": \"420\", \"city\": \"Utrecht\", \"zipCode\": \"2928ZP\" } }, { \"id\": \"1003\", \"firstName\": \"Chloe\", \"lastName\": \"Forsyth\", \"age\": 25, \"currentLivingAddress\": { \"street\": \"SOMESTREET\", \"houseNumber\": \"103a\", \"city\": \"De Hauge\", \"zipCode\": \"3928ZP\" } }, { \"id\": \"1004\", \"firstName\": \"Selman\", \"lastName\": \"Schriemer\", \"age\": 62, \"currentLivingAddress\": { \"street\": \"Kastanjestraat\", \"houseNumber\": \"137\", \"city\": \"Schagen\", \"zipCode\": \"1741WK\" } }, { \"id\": \"1005\", \"firstName\": \"Rik\", \"lastName\": \"Rik\", \"age\": 32, \"currentLivingAddress\": { \"street\": \"Postweg\", \"houseNumber\": \"81\", \"city\": \"Buren\", \"zipCode\": \"9164LS\" } } ]"));
+                "[{\"id\":\"1002\",\"customerId\":1002,\"firstName\":\"Charles\",\"lastName\":\"Bailey\",\"dateOfBirth\":\"1991-12-01\",\"age\":28,\"currentLivingAddress\":{\"street\":\"SOMESTREET\",\"houseNumber\":\"420\",\"city\":\"Utrecht\",\"zipCode\":\"2928ZP\"}},{\"id\":\"1003\",\"customerId\":1003,\"firstName\":\"Chloe\",\"lastName\":\"Forsyth\",\"dateOfBirth\":\"1995-01-11\",\"age\":25,\"currentLivingAddress\":{\"street\":\"SOMESTREET\",\"houseNumber\":\"103a\",\"city\":\"De Hauge\",\"zipCode\":\"3928ZP\"}},{\"id\":\"1001\",\"customerId\":1001,\"firstName\":\"John\",\"lastName\":\"Doe\",\"dateOfBirth\":\"2000-01-20\",\"age\":20,\"currentLivingAddress\":{\"street\":\"SOMESTREET\",\"houseNumber\":\"200\",\"city\":\"Amsterdam\",\"zipCode\":\"1928ZP\"}},{\"id\":\"1005\",\"customerId\":1005,\"firstName\":\"Rik\",\"lastName\":\"Rik\",\"dateOfBirth\":\"1987-03-14\",\"age\":32,\"currentLivingAddress\":{\"street\":\"Postweg\",\"houseNumber\":\"81\",\"city\":\"Buren\",\"zipCode\":\"9164LS\"}},{\"id\":\"1004\",\"customerId\":1004,\"firstName\":\"Selman\",\"lastName\":\"Schriemer\",\"dateOfBirth\":\"1957-11-23\",\"age\":62,\"currentLivingAddress\":{\"street\":\"Kastanjestraat\",\"houseNumber\":\"137\",\"city\":\"Schagen\",\"zipCode\":\"1741WK\"}}]"));
 
     }
 
@@ -69,7 +74,7 @@ public class CustomerControllerIntegrationTest {
     @Test
     void testGetCustomerById() throws Exception {
         mockMvc.perform(get("/customers/1001")).andDo(print()).andExpect(status().isOk()).andExpect(content().json(
-                "{\"id\":\"1001\",\"customerId\":1001,\"firstName\":\"John\",\"lastName\":\"Doe\",\"dateOfBirth\":\"2000-01-20\",\"age\":20,\"currentLivingAddress\":{\"street\":\"SOMESTREET\",\"houseNumber\":\"200\",\"city\":\"Amsterdam\",\"zipCode\":\"1928ZP\"}}"));
+                "{\"id\":\"1001\",\"firstName\":\"John\",\"lastName\":\"Doe\",\"age\":20,\"currentLivingAddress\":{\"street\":\"SOMESTREET\",\"houseNumber\":\"200\",\"city\":\"Amsterdam\",\"zipCode\":\"1928ZP\"}}"));
 
         mockMvc.perform(get("/customers/2001")).andDo(print()).andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status", is("NOT_FOUND")))
@@ -110,3 +115,6 @@ public class CustomerControllerIntegrationTest {
     }
 
 }
+
+
+
