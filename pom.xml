@@ -172,11 +172,11 @@
                         <groupId>com.google.cloud.tools</groupId>
                         <artifactId>jib-maven-plugin</artifactId>
                         <configuration>
-                            <to>
-                                <tags>
-                                    <tag>${COMMIT_ID}</tag>
-                                </tags>
-                            </to>
+<!--                            <to>-->
+<!--                                <tags>-->
+<!--                                    <tag>${COMMIT_ID}</tag>-->
+<!--                                </tags>-->
+<!--                            </to>-->
                         </configuration>
                     </plugin>
                 </plugins>
