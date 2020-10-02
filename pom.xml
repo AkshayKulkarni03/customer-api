@@ -87,6 +87,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${postgresql.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-core</artifactId>
             <version>1.1.49</version>
@@ -145,21 +151,76 @@
             </dependencies>
         </profile>
         <profile>
-            <id>dev</id>
+            <id>local</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>org.postgresql</groupId>
-                    <artifactId>postgresql</artifactId>
-                    <version>${postgresql.version}</version>
-                </dependency>
-            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.google.cloud.tools</groupId>
+                        <artifactId>jib-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>dev</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.google.cloud.tools</groupId>
+                        <artifactId>jib-maven-plugin</artifactId>
+                        <configuration>
+                            <to>
+                                <tags>
+                                    <tag>${TRAVIS_BUILD_ID}</tag>
+                                </tags>
+                            </to>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.google.cloud.tools</groupId>
+                    <artifactId>jib-maven-plugin</artifactId>
+                    <version>${jib-maven-plugin.version}</version>
+                    <configuration>
+                        <from>
+                            <!-- <image>adoptopenjdk/openjdk11:alpine</image> -->
+                            <image>gcr.io/distroless/java:11</image>
+                        </from>
+                        <to>
+                            <image>${image-path}</image>
+                            <auth>
+                                <username>${DOCKER_USERNAME}</username>
+                                <password>${DOCKER_PASSWORD}</password>
+                            </auth>
+                            <tags>
+                                <!--                            <tag>${TRAVIS_BUILD_ID}</tag>-->
+                                <tag>latest</tag>
+                            </tags>
+                        </to>
+                        <container>
+                            <ports>
+                                <port>8080</port>
+                            </ports>
+                            <jvmFlags>
+                                <jvmFlag>-Xms512m</jvmFlag>
+                                <jvmFlag>-Xmx1024m</jvmFlag>
+                                <jvmFlag>-Dspring.profiles.active=dev</jvmFlag>
+                            </jvmFlags>
+                        </container>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -200,12 +261,12 @@
                 <configuration>
                     <mainClass>com.example.customer.CustomerAssignmentApplication</mainClass>
                     <classifier>dist</classifier>
-                    <!--                    <excludes>-->
-                    <!--                        <exclude>-->
-                    <!--                            <groupId>org.springframework.cloud</groupId>-->
-                    <!--                            <artifactId>spring-cloud-deployer-spi-scheduler-test-app</artifactId>-->
-                    <!--                        </exclude>-->
-                    <!--                    </excludes>-->
+                    <excludes>
+                        <exclude>
+                            <groupId>org.springframework.cloud</groupId>
+                            <artifactId>spring-cloud-deployer-spi-scheduler-test-app</artifactId>
+                        </exclude>
+                    </excludes>
                 </configuration>
             </plugin>
             <plugin>
@@ -249,37 +310,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>com.google.cloud.tools</groupId>
-                <artifactId>jib-maven-plugin</artifactId>
-                <version>${jib-maven-plugin.version}</version>
-                <configuration>
-                    <from>
-                        <!-- <image>adoptopenjdk/openjdk11:alpine</image> -->
-                        <image>gcr.io/distroless/java:11</image>
-                    </from>
-                    <to>
-                        <image>${image-path}</image>
-                        <auth>
-                            <username>${DOCKER_USERNAME}</username>
-                            <password>${DOCKER_PASSWORD}</password>
-                        </auth>
-                        <tags>
-                            <tag>latest</tag>
-                        </tags>
-                    </to>
-                    <container>
-                        <ports>
-                            <port>8080</port>
-                        </ports>
-                        <jvmFlags>
-                            <jvmFlag>-Xms512m</jvmFlag>
-                            <jvmFlag>-Xmx1024m</jvmFlag>
-                            <jvmFlag>-Dspring.profiles.active=dev</jvmFlag>
-                        </jvmFlags>
-                    </container>
-                </configuration>
             </plugin>
         </plugins>
     </build>
