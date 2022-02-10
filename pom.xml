@@ -21,7 +21,7 @@
         <java.version>11</java.version>
         <revision>0.0.1-SNAPSHOT</revision>
 
-        <postgresql.version>42.2.16</postgresql.version>
+        <postgresql.version>42.2.25</postgresql.version>
         <jib-maven-plugin.version>2.5.2</jib-maven-plugin.version>
         <image-path>registry.hub.docker.com/akshaykulkarni/customer-api</image-path>
 
