@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.3.4.RELEASE</version>
+        <version>2.7.10</version>
         <relativePath/>
     </parent>
 
@@ -18,10 +18,11 @@
     <packaging>jar</packaging>
 
     <properties>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <revision>0.0.1-SNAPSHOT</revision>
 
         <postgresql.version>42.4.3</postgresql.version>
+        <springdoc.version>1.6.15</springdoc.version>
         <jib-maven-plugin.version>2.5.2</jib-maven-plugin.version>
         <image-path>registry.hub.docker.com/akshaykulkarni/customer-api</image-path>
 
@@ -86,28 +87,26 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
 
+        <!--        <dependency>-->
+        <!--            <groupId>org.postgresql</groupId>-->
+        <!--            <artifactId>postgresql</artifactId>-->
+        <!--            <version>${postgresql.version}</version>-->
+        <!--        </dependency>-->
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${postgresql.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-core</artifactId>
-            <version>1.1.49</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>io.github.classgraph</groupId>
-                    <artifactId>classgraph</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
         </dependency>
 
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.1.49</version>
+            <version>${springdoc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-data-rest</artifactId>
+            <version>${springdoc.version}</version>
         </dependency>
 
         <dependency>
@@ -124,11 +123,6 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -172,11 +166,11 @@
                         <groupId>com.google.cloud.tools</groupId>
                         <artifactId>jib-maven-plugin</artifactId>
                         <configuration>
-<!--                            <to>-->
-<!--                                <tags>-->
-<!--                                    <tag>${COMMIT_ID}</tag>-->
-<!--                                </tags>-->
-<!--                            </to>-->
+                            <!--                            <to>-->
+                            <!--                                <tags>-->
+                            <!--                                    <tag>${COMMIT_ID}</tag>-->
+                            <!--                                </tags>-->
+                            <!--                            </to>-->
                         </configuration>
                     </plugin>
                 </plugins>
@@ -287,7 +281,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.5</version>
+                <version>0.8.8</version>
                 <dependencies>
                     <dependency>
                         <groupId>javax.xml.bind</groupId>

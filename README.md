@@ -8,7 +8,7 @@ Customer API [Spring Boot](http://projects.spring.io/spring-boot/) with embedded
 ## Requirements
 For building and running the application you need:
 
-- [JDK 11](https://adoptopenjdk.net/?variant=openjdk11&jvmVariant=hotspot)
+- [JDK 17](https://adoptium.net/en-GB/)
 - [Maven 3](https://maven.apache.org)
 
 ## Running the application locally
@@ -22,7 +22,7 @@ mvn spring-boot:run
 ```
 
 ### Swagger definition
-Once application is running with above mentioned steps, API documentation can be accessed via [Swagger UI](http://localhost:8080/swagger-ui/index.html?url=/v3/api-docs&validatorUrl=#/).
+Once application is running with above mentioned steps, API documentation can be accessed via [Swagger UI](http://localhost:8080/swagger-ui.html).
 
 ### H2 Database
 In memory H2 database can be accessed via [H2-DB Console](http://localhost:8080/h2-console).
